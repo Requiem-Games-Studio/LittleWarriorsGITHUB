@@ -176,7 +176,7 @@ ScriptedImporter:
     indices: 
     edges: []
     tessellationDetail: 0
-    uvTransform: {x: 519, y: 154}
+    uvTransform: {x: 522, y: 161}
     spritePosition: {x: 39, y: 123}
   - name: BRAZO DR
     originalName: 
@@ -197,7 +197,7 @@ ScriptedImporter:
     indices: 
     edges: []
     tessellationDetail: 0
-    uvTransform: {x: 514, y: -2}
+    uvTransform: {x: 522, y: 4}
     spritePosition: {x: 661, y: 129}
   - name: CUERPO
     originalName: 
@@ -239,7 +239,7 @@ ScriptedImporter:
     indices: 
     edges: []
     tessellationDetail: 0
-    uvTransform: {x: 661, y: 159}
+    uvTransform: {x: 663, y: 161}
     spritePosition: {x: 183, y: 35}
   - name: PIE IZ
     originalName: 
@@ -260,7 +260,7 @@ ScriptedImporter:
     indices: 
     edges: []
     tessellationDetail: 0
-    uvTransform: {x: 825, y: 159}
+    uvTransform: {x: 827, y: 161}
     spritePosition: {x: 473, y: 35}
   characterData:
     bones:
@@ -463,16 +463,6 @@ ScriptedImporter:
     parentIndex: -1
     spriteID: b96a823cb1caee54da2c529672dcca55
     layerID: 909
-    mosaicPosition: {x: 0, y: 0}
-    flatten: 0
-    isImported: 0
-    isVisible: 0
-  - name: "Tono/saturaci\xF3n 1 copia 3"
-    spriteName: 
-    isGroup: 0
-    parentIndex: -1
-    spriteID: 36a4dc1a75e355944a445726139146d9
-    layerID: 908
     mosaicPosition: {x: 0, y: 0}
     flatten: 0
     isImported: 0
