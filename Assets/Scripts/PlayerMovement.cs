@@ -9,7 +9,7 @@ public class PlayerMovement : MonoBehaviourPun, IPunObservable, IInRoomCallbacks
     public static PlayerMovement instance;
 
     Rigidbody2D _rb;
-    Animator animator;
+    public Animator animator;
 
     public float velocidad;
     public float jumpForce;
@@ -45,7 +45,6 @@ public class PlayerMovement : MonoBehaviourPun, IPunObservable, IInRoomCallbacks
 
     private void Awake()
     {
-        animator = GetComponent<Animator>();
 
         PhotonNetwork.SendRate = 60;
         PhotonNetwork.SerializationRate = 20;
@@ -257,8 +256,9 @@ public class PlayerMovement : MonoBehaviourPun, IPunObservable, IInRoomCallbacks
 
     public void Jump()
     {
+        animator.Play("StartJump");
         _rb.velocity = new Vector2(_rb.velocity.x, 0f);
-        _rb.AddForce(Vector2.up * jumpForce, ForceMode2D.Impulse);
+        _rb.AddForce(Vector2.up * jumpForce, ForceMode2D.Impulse);       
     }
 
     private void OnDestroy()
@@ -356,7 +356,7 @@ public class PlayerMovement : MonoBehaviourPun, IPunObservable, IInRoomCallbacks
             string hexColor = colorValue as string;
             if (ColorUtility.TryParseHtmlString("#" + hexColor, out Color color))
             {
-                GetComponent<SpriteRenderer>().color = color;
+                //GetComponent<SpriteRenderer>().color = color;
             }
         }
     }

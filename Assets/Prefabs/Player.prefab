@@ -175,8 +175,16 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   velocidad: 5
   jumpForce: 12
+  squishedGravity: 0
   syncSpeed: 0.9
   margin: 0.45
+  rayDist: 0
+  groundLayer:
+    serializedVersion: 2
+    m_Bits: 0
+  normalCollider: {fileID: 0}
+  squishedCollider: {fileID: 0}
+  alturaMinimaAplastamiento: 3
 --- !u!114 &1591752719305551066
 MonoBehaviour:
   m_ObjectHideFlags: 0
