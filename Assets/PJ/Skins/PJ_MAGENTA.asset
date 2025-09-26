@@ -1,0 +1,21 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1976277410874994787b35c7565efd7a, type: 3}
+  m_Name: PJ_MAGENTA
+  m_EditorClassIdentifier: 
+  brazoDerecho: {fileID: 5405954259863231210, guid: 3daa51f9aac1cfb44864944f95e9652e, type: 3}
+  brazoIzquierdo: {fileID: 976985341164910721, guid: 3daa51f9aac1cfb44864944f95e9652e, type: 3}
+  cuerpo: {fileID: -2894669881312672365, guid: 3daa51f9aac1cfb44864944f95e9652e, type: 3}
+  ojoDerecho: {fileID: -9179187348902970936, guid: 3daa51f9aac1cfb44864944f95e9652e, type: 3}
+  ojoIzquierdo: {fileID: -8963735277873612880, guid: 3daa51f9aac1cfb44864944f95e9652e, type: 3}
+  pieDerecho: {fileID: 1347616878000084229, guid: 3daa51f9aac1cfb44864944f95e9652e, type: 3}
+  pieIzquierdo: {fileID: -7089728995280130186, guid: 3daa51f9aac1cfb44864944f95e9652e, type: 3}

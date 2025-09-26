@@ -46,6 +46,10 @@ MonoBehaviour:
   - RPC_BecomeSquished
   - RPC_Respawn
   - OpenDoor
+  - ApplySkinToPlayer
+  - ApplySkinServer
+  - ApplySkinRemote
+  - SyncPlayerSkin
   DisableAutoOpenWizard: 1
   ShowSettings: 1
   DevRegionSetOnce: 1

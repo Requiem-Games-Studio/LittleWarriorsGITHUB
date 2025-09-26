@@ -10,15 +10,18 @@ public class PlayerData : MonoBehaviour
     public int colorNumber;
     Color myColor;
 
+    public SkinMaker mySkin;
+
+
     private void Awake()
     {
         instance = this;
         DontDestroyOnLoad(this);
     }
 
-    public void SetColor(Color color)
+    public void SetColor(SkinMaker skin)
     {
-        myColor = color;
+        mySkin = skin;
     }
 
     public Color GetColor()

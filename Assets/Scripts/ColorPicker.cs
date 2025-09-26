@@ -30,9 +30,9 @@ public class ColorPicker : MonoBehaviour
 
         CreateSVImage();
 
-        CreateOutputImage();
+        //CreateOutputImage();
 
-        UpdateOutputImage();
+        //UpdateOutputImage();
     }
 
     private void CreateHueImage()
@@ -76,94 +76,94 @@ public class ColorPicker : MonoBehaviour
 
     }
 
-    private void CreateOutputImage()
-    {
-        outputTexture = new Texture2D(1, 16);
-        outputTexture.wrapMode = TextureWrapMode.Clamp;
-        outputTexture.name = "OutputTexture";
+    //private void CreateOutputImage()
+    //{
+    //    outputTexture = new Texture2D(1, 16);
+    //    outputTexture.wrapMode = TextureWrapMode.Clamp;
+    //    outputTexture.name = "OutputTexture";
 
-        Color currentColour = Color.HSVToRGB(currentHue, currentSat, currentVal);
+    //    Color currentColour = Color.HSVToRGB(currentHue, currentSat, currentVal);
 
-        for (int i = 0; i < outputTexture.height; i++)
-        {
-            outputTexture.SetPixel(0, i, currentColour);
-        }
+    //    for (int i = 0; i < outputTexture.height; i++)
+    //    {
+    //        outputTexture.SetPixel(0, i, currentColour);
+    //    }
 
-        outputTexture.Apply();
+    //    outputTexture.Apply();
 
-        outputImage.texture = outputTexture;
+    //    outputImage.texture = outputTexture;
 
-    }
+    //}
 
-    private void UpdateOutputImage()
-    {
-        Color currentColour = Color.HSVToRGB(currentHue, currentSat, currentVal);
+    //private void UpdateOutputImage()
+    //{
+    //    Color currentColour = Color.HSVToRGB(currentHue, currentSat, currentVal);
 
-        for (int i = 0; i < outputTexture.height; i++)
-        {
-            outputTexture.SetPixel(0, i, currentColour);
-        }
+    //    for (int i = 0; i < outputTexture.height; i++)
+    //    {
+    //        outputTexture.SetPixel(0, i, currentColour);
+    //    }
 
-        outputTexture.Apply();
+    //    outputTexture.Apply();
 
-        hexInputField.text = ColorUtility.ToHtmlStringRGB(currentColour);
+    //    hexInputField.text = ColorUtility.ToHtmlStringRGB(currentColour);
 
-        PlayerData.instance.SetColor(currentColour);
+    //    PlayerData.instance.SetColor(currentColour);
 
-        changeThisColor.color = currentColour;
+    //    changeThisColor.color = currentColour;
 
-        Hashtable playerProperties = new Hashtable();
-        playerProperties["color"] = hexInputField.text; // o puedes guardar un int o código RGB
-        PhotonNetwork.LocalPlayer.SetCustomProperties(playerProperties);
-    }
+    //    Hashtable playerProperties = new Hashtable();
+    //    playerProperties["color"] = hexInputField.text; // o puedes guardar un int o código RGB
+    //    PhotonNetwork.LocalPlayer.SetCustomProperties(playerProperties);
+    //}
 
-    public void SetSV(float S, float V)
-    {
-        currentSat = S;
-        currentVal = V;
+    //public void SetSV(float S, float V)
+    //{
+    //    currentSat = S;
+    //    currentVal = V;
 
-        UpdateOutputImage();
-    }
+    //    UpdateOutputImage();
+    //}
 
-    public void UpdateSVImage()
-    {
-        currentHue = hueSlider.value;
+    //public void UpdateSVImage()
+    //{
+    //    currentHue = hueSlider.value;
 
-        for (int y = 0; y < svTexture.height; y++)
-        {
-            for (int x = 0; x < svTexture.width; x++)
-            {
-                svTexture.SetPixel(x, y, Color.HSVToRGB(currentHue, (float)x / svTexture.width, (float)y / svTexture.height));
-            }
-        }
+    //    for (int y = 0; y < svTexture.height; y++)
+    //    {
+    //        for (int x = 0; x < svTexture.width; x++)
+    //        {
+    //            svTexture.SetPixel(x, y, Color.HSVToRGB(currentHue, (float)x / svTexture.width, (float)y / svTexture.height));
+    //        }
+    //    }
 
-        svTexture.Apply();
+    //    svTexture.Apply();
 
-        UpdateOutputImage();
+    //    UpdateOutputImage();
 
-    }
+    //}
 
-    public void OnTextInput()
-    {
-        if (hexInputField.text.Length < 6) { return; }
+    //public void OnTextInput()
+    //{
+    //    if (hexInputField.text.Length < 6) { return; }
 
-        Color newCol;
+    //    Color newCol;
 
-        if (ColorUtility.TryParseHtmlString("#" + hexInputField.text, out newCol))
-            Color.RGBToHSV(newCol, out currentHue, out currentSat, out currentVal);
+    //    if (ColorUtility.TryParseHtmlString("#" + hexInputField.text, out newCol))
+    //        Color.RGBToHSV(newCol, out currentHue, out currentSat, out currentVal);
 
-        hueSlider.value = currentHue;
+    //    hueSlider.value = currentHue;
 
-        hexInputField.text = "";
+    //    hexInputField.text = "";
 
-        UpdateOutputImage();
+    //    UpdateOutputImage();
 
-    }
+    //}
 
-    public void CloseColorPicker()
-    {
-        colorPickerGO.SetActive(false);
-    }
+    //public void CloseColorPicker()
+    //{
+    //    colorPickerGO.SetActive(false);
+    //}
 
     public void OpenColorPicker()
     {

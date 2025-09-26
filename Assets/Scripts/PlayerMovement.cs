@@ -61,7 +61,7 @@ public class PlayerMovement : MonoBehaviourPun, IPunObservable, IInRoomCallbacks
                 PlayerData.instance.myPlayer = this;
             }
 
-            ApplyColorFromProperties(photonView.Owner);
+            //ApplyColorFromProperties(photonView.Owner);
         }
     }
     private void Start()
@@ -70,20 +70,20 @@ public class PlayerMovement : MonoBehaviourPun, IPunObservable, IInRoomCallbacks
             CameraController.instance.m_Targets.Add(this.transform);
     }
 
-    [PunRPC]
-    public void ApplyColorToPlayer(PlayerMovement player, string colorHex)
-    {
-        Color color;
-        //object colorValue;
-        if (ColorUtility.TryParseHtmlString("#" + colorHex, out color))
-        {
-            player.GetComponent<SpriteRenderer>().color = color;
-        }
-        //if (photonView.Owner.CustomProperties.TryGetValue("color", out colorValue))
-        //{
+    //[PunRPC]
+    //public void ApplyColorToPlayer(PlayerMovement player, string colorHex)
+    //{
+    //    Color color;
+    //    //object colorValue;
+    //    if (ColorUtility.TryParseHtmlString("#" + colorHex, out color))
+    //    {
+    //        player.GetComponent<SpriteRenderer>().color = color;
+    //    }
+    //    //if (photonView.Owner.CustomProperties.TryGetValue("color", out colorValue))
+    //    //{
    
-        //}
-    }
+    //    //}
+    //}
 
     void Update()
     {
@@ -343,23 +343,23 @@ public class PlayerMovement : MonoBehaviourPun, IPunObservable, IInRoomCallbacks
     public void OnPlayerPropertiesUpdate(Player targetPlayer, ExitGames.Client.Photon.Hashtable changedProps)
     {
         // Solo reaccionamos si este player es el dueño de este GameObject
-        if (targetPlayer == photonView.Owner && changedProps.ContainsKey("color"))
-        {
-            ApplyColorFromProperties(targetPlayer);
-        }
+        //if (targetPlayer == photonView.Owner && changedProps.ContainsKey("color"))
+        //{
+        //    ApplyColorFromProperties(targetPlayer);
+        //}
     }
 
-    private void ApplyColorFromProperties(Player player)
-    {
-        if (player.CustomProperties.TryGetValue("color", out object colorValue))
-        {
-            string hexColor = colorValue as string;
-            if (ColorUtility.TryParseHtmlString("#" + hexColor, out Color color))
-            {
-                //GetComponent<SpriteRenderer>().color = color;
-            }
-        }
-    }
+    //private void ApplyColorFromProperties(Player player)
+    //{
+    //    if (player.CustomProperties.TryGetValue("color", out object colorValue))
+    //    {
+    //        string hexColor = colorValue as string;
+    //        if (ColorUtility.TryParseHtmlString("#" + hexColor, out Color color))
+    //        {
+    //            //GetComponent<SpriteRenderer>().color = color;
+    //        }
+    //    }
+    //}
 
     public void OnPlayerEnteredRoom(Player newPlayer) { }
     public void OnPlayerLeftRoom(Player otherPlayer) { }

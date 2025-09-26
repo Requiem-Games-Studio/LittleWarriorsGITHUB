@@ -5,15 +5,19 @@ using UnityEngine;
 
 public class ColorSelector : MonoBehaviour
 {
-    public List<Color> colors;
+    public List<SkinMaker> skins;
     public List<GameObject> colorsSelected;
     public int colorSelected = 0;
+    public SkinMaker skinSelected;
 
 
     private void Awake()
     {
         if (PlayerData.instance != null)
+        {
             colorSelected = PlayerData.instance.colorNumber;
+            skinSelected = skins[6]; //Skin default
+        }
 
         colorsSelected[colorSelected].SetActive(true);
 
@@ -25,7 +29,17 @@ public class ColorSelector : MonoBehaviour
         colorSelected = index;
 
         if (PlayerData.instance != null)
+        {
+            var skin = SkinsManager.instance.GetSkinValue(index);
+            PlayerData.instance.mySkin = skin;
+            skinSelected = skin;
             PlayerData.instance.colorNumber = index;
+        }
+
+        if (PlayerData.instance.myPlayer != null)
+        {
+            PlayerData.instance.myPlayer.GetComponent<PlayerSkin>().SetSkinLocal();
+        }
 
         foreach (var color in colorsSelected)
         {
@@ -34,10 +48,10 @@ public class ColorSelector : MonoBehaviour
 
         colorsSelected[index].SetActive(true);
 
-        Hashtable playerProperties = new Hashtable();
-        var colorHex = ColorUtility.ToHtmlStringRGB(colors[index]);
-        playerProperties["color"] = colorHex; // o puedes guardar un int o código RGB
-        PhotonNetwork.LocalPlayer.SetCustomProperties(playerProperties);
+        //Hashtable playerProperties = new Hashtable();
+        //var colorHex = ColorUtility.ToHtmlStringRGB(colors[index]);
+        //playerProperties["color"] = colorHex; // o puedes guardar un int o código RGB
+        //PhotonNetwork.LocalPlayer.SetCustomProperties(playerProperties);
         //PlayerData.instance.myPlayer.ApplyColorFromProperties(PlayerData.instance.myPlayer);
     }
 }
