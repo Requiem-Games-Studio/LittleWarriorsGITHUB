@@ -3,6 +3,7 @@ using Photon.Realtime;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using DG.Tweening;
 
 public class PlayerMovement : MonoBehaviourPun, IPunObservable, IInRoomCallbacks
 {
@@ -42,6 +43,12 @@ public class PlayerMovement : MonoBehaviourPun, IPunObservable, IInRoomCallbacks
     private bool estaCayendo;
     public float alturaMinimaAplastamiento = 3f;
 
+    [Header("Extremidades para apagarlas")]
+    public GameObject brazoIzquierda;
+    public GameObject brazoDerecha;
+    public GameObject pieIzquierda;
+    public GameObject pieDerecha;
+
 
     private void Awake()
     {
@@ -70,20 +77,6 @@ public class PlayerMovement : MonoBehaviourPun, IPunObservable, IInRoomCallbacks
             CameraController.instance.m_Targets.Add(this.transform);
     }
 
-    //[PunRPC]
-    //public void ApplyColorToPlayer(PlayerMovement player, string colorHex)
-    //{
-    //    Color color;
-    //    //object colorValue;
-    //    if (ColorUtility.TryParseHtmlString("#" + colorHex, out color))
-    //    {
-    //        player.GetComponent<SpriteRenderer>().color = color;
-    //    }
-    //    //if (photonView.Owner.CustomProperties.TryGetValue("color", out colorValue))
-    //    //{
-   
-    //    //}
-    //}
 
     void Update()
     {
@@ -93,6 +86,13 @@ public class PlayerMovement : MonoBehaviourPun, IPunObservable, IInRoomCallbacks
             currentTime += Time.deltaTime;
             transform.position = Vector3.Lerp(positionAtLastPacket, networkPosition, (float)(currentTime / timeToReachGoal) * syncSpeed);
             return;
+        }
+
+        //Caminar dentro del tubo
+        if (isSquished)
+        {
+            HandleSquishedMovement();
+            return; // No ejecutar el resto del movimiento normal
         }
 
         horizontalMovement = Input.GetAxisRaw("Horizontal");
@@ -167,6 +167,23 @@ public class PlayerMovement : MonoBehaviourPun, IPunObservable, IInRoomCallbacks
         }
     }
 
+    void HandleSquishedMovement()
+    {
+        // Apagar gravedad
+        _rb.gravityScale = 0f;
+
+        // Movimiento vertical
+        float verticalMovement = Input.GetAxisRaw("Vertical");
+
+        // Controlar velocidad vertical
+        float squishedSpeed = 3f; // Podés ajustarlo o exponerlo al Inspector
+
+        _rb.velocity = new Vector2(0f, verticalMovement * squishedSpeed);
+
+        // Actualizar animaciones cuando haya
+
+    }
+
     private void OnCollisionEnter2D(Collision2D collision)
     {
         if (!photonView.IsMine) return;
@@ -193,7 +210,12 @@ public class PlayerMovement : MonoBehaviourPun, IPunObservable, IInRoomCallbacks
                 {
                     Debug.Log("[APLASTAMIENTO] Jugador de arriba aplasta al de abajo");
                     if (IsOverPitOrRendija())
+                    {
+                        Rendija newRendija = GetRendija();
+                        transform.DOMove(newRendija.transform.position, 0.5f);
+                        //transform.position = newRendija.startPosition.position;
                         photonView.RPC(nameof(RPC_BecomeSquished), RpcTarget.All);
+                    }
                     else
                         photonView.RPC(nameof(RPC_Respawn), RpcTarget.All);
                 }
@@ -203,13 +225,38 @@ public class PlayerMovement : MonoBehaviourPun, IPunObservable, IInRoomCallbacks
                 }
             }
         }
+
+
     }
 
+
+    private void OnTriggerEnter2D(Collider2D collision)
+    {
+        if (!photonView.IsMine) return;
+
+        //Si salgo de una rendija
+        if (collision.gameObject.GetComponent<RendijaExit>())
+        {
+            if (isSquished)
+            {
+                //transform.position = collision.gameObject.GetComponent<RendijaExit>().exitPosition.position;
+                transform.DOMove(collision.gameObject.GetComponent<RendijaExit>().exitPosition.position, 0.5f);
+                photonView.RPC(nameof(RPC_ExitSquished), RpcTarget.All);
+            }
+        }
+    }
 
     [PunRPC]
     private void RPC_BecomeSquished()
     {
-        StartCoroutine(BecomeSquished());
+        StartCoroutine(EnterSquishedMode());
+        
+    }
+
+    [PunRPC]
+    private void RPC_ExitSquished()
+    {
+        StartCoroutine(ExitSquishedMode());
     }
 
     [PunRPC]
@@ -220,22 +267,69 @@ public class PlayerMovement : MonoBehaviourPun, IPunObservable, IInRoomCallbacks
 
     private bool IsOverPitOrRendija()
     {
-        RaycastHit2D hit = Physics2D.Raycast(transform.position, Vector2.down, rayDist,groundLayer);
+        RaycastHit2D hit = Physics2D.Raycast(transform.position, Vector2.down, rayDist, groundLayer);
         bool result = (hit.collider != null);
 
         return result;
     }
 
-    private IEnumerator BecomeSquished()
+    private Rendija GetRendija()
     {
+        RaycastHit2D hit = Physics2D.Raycast(transform.position, Vector2.down, rayDist, groundLayer);
+        return hit.collider.gameObject.GetComponent<Rendija>();
+    }
+
+    public IEnumerator EnterSquishedMode()
+    {
+        animator.SetBool("IsSquished", true);
+
+        // Apagar extremidades
+        brazoDerecha.SetActive(false);
+        brazoIzquierda.SetActive(false);
+        pieIzquierda.SetActive(false);
+        pieDerecha.SetActive(false);
+
+        yield return new WaitForSeconds(0.5f);
+
         isSquished = true;
         normalCollider.enabled = false;
         squishedCollider.enabled = true;
         _rb.gravityScale = squishedGravity;
-        animator.SetBool("IsSquished", true);
+    
+    }
 
+    public IEnumerator ExitSquishedMode()
+    {
+        animator.SetBool("IsSquished", false);
+
+        // Restaurar extremidades
+        brazoDerecha.SetActive(true);
+        brazoIzquierda.SetActive(true);
+        pieIzquierda.SetActive(true);
+        pieDerecha.SetActive(true);
+
+        yield return new WaitForSeconds(0.5f);
+
+        isSquished = false;
+   
+
+        squishedCollider.enabled = false;
+        normalCollider.enabled = true;
+        _rb.gravityScale = currentGravity;
+
+    }
+
+    private IEnumerator BecomeSquished()
+    {
         // Estás en modo aplastado. Aquí puedes limitar movimiento si lo deseas.
-        yield return new WaitForSeconds(3f); // Ejemplo: se desaplasta en 3 segundos
+        //yield return new WaitForSeconds(3f); // Ejemplo: se desaplasta en 3 segundos
+        yield return null;
+
+        //Prendo las extremidades
+        brazoDerecha.SetActive(true);
+        brazoIzquierda.SetActive(true);
+        pieIzquierda.SetActive(true);
+        pieDerecha.SetActive(true);
 
         animator.SetBool("IsSquished", false);
         squishedCollider.enabled = false;
@@ -257,15 +351,23 @@ public class PlayerMovement : MonoBehaviourPun, IPunObservable, IInRoomCallbacks
     public void Jump()
     {
         animator.Play("StartJump");
+        photonView.RPC("SincronizarSalto", RpcTarget.Others, true);  // Enviamos la animación también
         _rb.velocity = new Vector2(_rb.velocity.x, 0f);
-        _rb.AddForce(Vector2.up * jumpForce, ForceMode2D.Impulse);       
+        _rb.AddForce(Vector2.up * jumpForce, ForceMode2D.Impulse);
+    }
+
+    [PunRPC]
+    void SincronizarSalto(bool saltando)
+    {
+        // Sincronizar la animación de salto
+        animator.Play("StartJump");
     }
 
     private void OnDestroy()
     {
         CameraController.instance.m_Targets.Remove(this.transform);
     }
-    
+
     private void OnDrawGizmos()
     {
         Gizmos.color = Color.red;
@@ -305,7 +407,7 @@ public class PlayerMovement : MonoBehaviourPun, IPunObservable, IInRoomCallbacks
             currentPacketTime = info.SentServerTime;
             positionAtLastPacket = transform.position;
 
-            if (!photonView.IsMine) 
+            if (!photonView.IsMine)
             {
                 animator.SetFloat("Speed", receivedSpeed);
                 animator.SetBool("IsJumping", isJumping);
@@ -348,19 +450,6 @@ public class PlayerMovement : MonoBehaviourPun, IPunObservable, IInRoomCallbacks
         //    ApplyColorFromProperties(targetPlayer);
         //}
     }
-
-    //private void ApplyColorFromProperties(Player player)
-    //{
-    //    if (player.CustomProperties.TryGetValue("color", out object colorValue))
-    //    {
-    //        string hexColor = colorValue as string;
-    //        if (ColorUtility.TryParseHtmlString("#" + hexColor, out Color color))
-    //        {
-    //            //GetComponent<SpriteRenderer>().color = color;
-    //        }
-    //    }
-    //}
-
     public void OnPlayerEnteredRoom(Player newPlayer) { }
     public void OnPlayerLeftRoom(Player otherPlayer) { }
     public void OnRoomPropertiesUpdate(Hashtable propertiesThatChanged) { }

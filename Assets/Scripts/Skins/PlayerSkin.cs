@@ -3,6 +3,7 @@ using Photon.Realtime;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.U2D.Animation;
 
 public class PlayerSkin : MonoBehaviourPunCallbacks
 {
@@ -78,7 +79,6 @@ public class PlayerSkin : MonoBehaviourPunCallbacks
         player.BRAZOIZQUIERDO.sprite = skin.brazoIzquierdo;
 
         player.CUERPO.sprite = skin.cuerpo;
-
 
         player.PIEDERECHO.sprite = skin.pieDerecho;
         player.PIEIZQUIERDO.sprite = skin.pieIzquierdo;
