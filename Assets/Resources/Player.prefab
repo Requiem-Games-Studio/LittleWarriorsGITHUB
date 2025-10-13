@@ -180,7 +180,7 @@ MonoBehaviour:
     m_Bits: 64
   normalCollider: {fileID: 7240353274185392226}
   squishedCollider: {fileID: 597895056538839166}
-  alturaMinimaAplastamiento: -4.99
+  alturaMinimaAplastamiento: 2.5
   brazoIzquierda: {fileID: 8925382761390040632}
   brazoDerecha: {fileID: 1475264425544051728}
   pieIzquierda: {fileID: 5133312237293832937}

@@ -1,4 +1,4 @@
-using Photon.Pun;
+ï»¿using Photon.Pun;
 using Photon.Realtime;
 using System.Collections;
 using System.Collections.Generic;
@@ -26,13 +26,13 @@ public class PlayerMovement : MonoBehaviourPun, IPunObservable, IInRoomCallbacks
     Color _myColor;
     float currentGravity;
 
-    //Variables que me ayudan a determinar la posición de todos los jugadores de la red
+    //Variables que me ayudan a determinar la posiciÃ³n de todos los jugadores de la red
     double currentPacketTime = 0;
     double lastPacketTime = 0;
     [SerializeField]
     float syncSpeed;
     Vector2 positionAtLastPacket = Vector2.zero;
-    public float margin = 0.5f; // Ajusta según el tamaño del jugador o deja este valor por defecto
+    public float margin = 0.5f; // Ajusta segÃºn el tamaÃ±o del jugador o deja este valor por defecto
 
     public float rayDist;
     public LayerMask groundLayer;
@@ -42,6 +42,8 @@ public class PlayerMovement : MonoBehaviourPun, IPunObservable, IInRoomCallbacks
     private float alturaInicioCaida;
     private bool estaCayendo;
     public float alturaMinimaAplastamiento = 3f;
+    private float tiempoUltimaCaida;
+    public bool cayendoRecientemente => Time.time - tiempoUltimaCaida < 0.2f; // cayÃ³ en los Ãºltimos 0.2s
 
     [Header("Extremidades para apagarlas")]
     public GameObject brazoIzquierda;
@@ -77,7 +79,6 @@ public class PlayerMovement : MonoBehaviourPun, IPunObservable, IInRoomCallbacks
             CameraController.instance.m_Targets.Add(this.transform);
     }
 
-
     void Update()
     {
         if (!photonView.IsMine)
@@ -88,11 +89,10 @@ public class PlayerMovement : MonoBehaviourPun, IPunObservable, IInRoomCallbacks
             return;
         }
 
-        //Caminar dentro del tubo
         if (isSquished)
         {
             HandleSquishedMovement();
-            return; // No ejecutar el resto del movimiento normal
+            return;
         }
 
         horizontalMovement = Input.GetAxisRaw("Horizontal");
@@ -102,14 +102,10 @@ public class PlayerMovement : MonoBehaviourPun, IPunObservable, IInRoomCallbacks
         float horzExtent = vertExtent * cam.aspect;
 
         Vector3 camPos = cam.transform.position;
-
         float minX = camPos.x - horzExtent + margin;
         float maxX = camPos.x + horzExtent - margin;
 
         Vector3 newPos = transform.position + new Vector3(horizontalMovement * velocidad * Time.deltaTime, 0, 0);
-        bool inside = newPos.x > minX && newPos.x < maxX;
-
-        float adjustedSpeed = velocidad;
 
         if (horizontalMovement != 0)
         {
@@ -120,47 +116,48 @@ public class PlayerMovement : MonoBehaviourPun, IPunObservable, IInRoomCallbacks
                 if ((horizontalMovement < 0 && transform.position.x <= minX) ||
                     (horizontalMovement > 0 && transform.position.x >= maxX))
                 {
-                    // Bloquea el movimiento si está en el borde
                     _rb.velocity = new Vector2(0, _rb.velocity.y);
                     return;
                 }
             }
 
-            // Movimiento normal dentro de la cámara
-            _rb.velocity = new Vector2(horizontalMovement * adjustedSpeed, _rb.velocity.y);
+            _rb.velocity = new Vector2(horizontalMovement * velocidad, _rb.velocity.y);
         }
         else
         {
             _rb.velocity = new Vector2(0, _rb.velocity.y);
         }
 
-        if (photonView.IsMine)
+        if (animator != null)
         {
-            if (animator != null)
-            {
-                animator.SetFloat("Speed", Mathf.Abs(_rb.velocity.x));
-            }
-
-            if (horizontalMovement != 0)
-            {
-                Vector3 scale = transform.localScale;
-                scale.x = horizontalMovement > 0 ? 1f : -1f;
-                transform.localScale = scale;
-            }
-
+            animator.SetFloat("Speed", Mathf.Abs(_rb.velocity.x));
             animator.SetBool("IsJumping", !IsGrounded());
+        }
 
-            if (_rb.velocity.y < 0 && !estaCayendo)
+        if (horizontalMovement != 0)
+        {
+            Vector3 scale = transform.localScale;
+            scale.x = horizontalMovement > 0 ? 1f : -1f;
+            transform.localScale = scale;
+        }
+
+        if (_rb.velocity.y < -0.2f)
+        {
+            if (!estaCayendo)
             {
                 estaCayendo = true;
                 alturaInicioCaida = transform.position.y;
-            }
-            if (_rb.velocity.y >= 0)
-            {
-                estaCayendo = false;
+                photonView.RPC(nameof(RPC_UpdateAlturaInicioCaida), RpcTarget.Others, alturaInicioCaida);
+                Debug.Log($"[CAIDA] Empieza caÃ­da desde {alturaInicioCaida:F2}");
             }
         }
+        else if (_rb.velocity.y >= -0.1f && estaCayendo)
+        {
+            estaCayendo = false;
+            Debug.Log($"[CAIDA] Termina caÃ­da (Ãºltima altura={transform.position.y:F2})");
+        }
 
+        // --- SALTO ---
         if (Input.GetKeyDown(KeyCode.Space) && IsGrounded())
         {
             Jump();
@@ -169,88 +166,71 @@ public class PlayerMovement : MonoBehaviourPun, IPunObservable, IInRoomCallbacks
 
     void HandleSquishedMovement()
     {
-        // Apagar gravedad
         _rb.gravityScale = 0f;
-
-        // Movimiento vertical
         float verticalMovement = Input.GetAxisRaw("Vertical");
-
-        // Controlar velocidad vertical
-        float squishedSpeed = 3f; // Podés ajustarlo o exponerlo al Inspector
-
+        float squishedSpeed = 3f;
         _rb.velocity = new Vector2(0f, verticalMovement * squishedSpeed);
-
-        // Actualizar animaciones cuando haya
-
     }
 
+    // --- DETECCIÃ“N DE APLASTAMIENTO ---
     private void OnCollisionEnter2D(Collision2D collision)
     {
-        if (!photonView.IsMine) return;
-
-        // Evitar que un jugador ya aplastado pueda volver a ser procesado
-        if (isSquished) return;
+        if (!photonView.IsMine || isSquished) return;
 
         if (collision.gameObject.CompareTag("Player"))
         {
-            PlayerMovement otherMovement = collision.gameObject.GetComponent<PlayerMovement>();
-            if (otherMovement != null)
+            PlayerMovement other = collision.gameObject.GetComponent<PlayerMovement>();
+            if (other == null || other.isSquished) return;
+
+            float myY = transform.position.y;
+            float otherY = collision.transform.position.y;
+
+            if (otherY <= myY + 0.2f) return;
+
+            float diferenciaAlturaCaida = Mathf.Abs(otherY - other.alturaInicioCaida);
+
+            bool caidaSuficiente = diferenciaAlturaCaida >= alturaMinimaAplastamiento;
+            bool sobreRendija = IsOverPitOrRendija();
+
+            if (caidaSuficiente && sobreRendija)
             {
-                float myY = transform.position.y;
-                float otherY = collision.transform.position.y;
-
-                float diferenciaAlturaCaida = otherMovement.alturaInicioCaida - otherY;
-
-                Debug.Log($"[APLASTAMIENTO] diferencia caída={diferenciaAlturaCaida:F2} (mín {alturaMinimaAplastamiento})");
-
-                // Evitar que el otro esté aplastado también
-                if (otherMovement.isSquished) return;
-
-                if (otherY > myY && (otherMovement.alturaInicioCaida - otherY) >= alturaMinimaAplastamiento)
-                {
-                    Debug.Log("[APLASTAMIENTO] Jugador de arriba aplasta al de abajo");
-                    if (IsOverPitOrRendija())
-                    {
-                        Rendija newRendija = GetRendija();
-                        transform.DOMove(newRendija.transform.position, 0.5f);
-                        //transform.position = newRendija.startPosition.position;
-                        photonView.RPC(nameof(RPC_BecomeSquished), RpcTarget.All);
-                    }
-                    else
-                        photonView.RPC(nameof(RPC_Respawn), RpcTarget.All);
-                }
-                else
-                {
-                    Debug.Log("[APLASTAMIENTO] No alcanzó altura mínima para aplastar");
-                }
+                Rendija rendija = GetRendija();
+                transform.DOMove(rendija.transform.position, 0.75f);
+                photonView.RPC(nameof(RPC_BecomeSquished), RpcTarget.All);
+            }
+            else
+            {
+                photonView.RPC(nameof(RPC_Respawn), RpcTarget.All);
             }
         }
-
-
     }
-
-
     private void OnTriggerEnter2D(Collider2D collision)
     {
-        if (!photonView.IsMine) return;
+        if (!photonView.IsMine) return; //Si salgo de una rendija
 
-        //Si salgo de una rendija
         if (collision.gameObject.GetComponent<RendijaExit>())
         {
             if (isSquished)
             {
-                //transform.position = collision.gameObject.GetComponent<RendijaExit>().exitPosition.position;
-                transform.DOMove(collision.gameObject.GetComponent<RendijaExit>().exitPosition.position, 0.5f);
+                transform.DOMove(collision.gameObject.GetComponent<RendijaExit>().exitPosition.position, 0.75f);
                 photonView.RPC(nameof(RPC_ExitSquished), RpcTarget.All);
             }
         }
+    }
+
+
+    // --- RPC ---
+    [PunRPC]
+    void RPC_UpdateAlturaInicioCaida(float nuevaAltura)
+    {
+        alturaInicioCaida = nuevaAltura;
     }
 
     [PunRPC]
     private void RPC_BecomeSquished()
     {
         StartCoroutine(EnterSquishedMode());
-        
+
     }
 
     [PunRPC]
@@ -295,7 +275,7 @@ public class PlayerMovement : MonoBehaviourPun, IPunObservable, IInRoomCallbacks
         normalCollider.enabled = false;
         squishedCollider.enabled = true;
         _rb.gravityScale = squishedGravity;
-    
+
     }
 
     public IEnumerator ExitSquishedMode()
@@ -311,7 +291,7 @@ public class PlayerMovement : MonoBehaviourPun, IPunObservable, IInRoomCallbacks
         yield return new WaitForSeconds(0.5f);
 
         isSquished = false;
-   
+
 
         squishedCollider.enabled = false;
         normalCollider.enabled = true;
@@ -321,7 +301,7 @@ public class PlayerMovement : MonoBehaviourPun, IPunObservable, IInRoomCallbacks
 
     private IEnumerator BecomeSquished()
     {
-        // Estás en modo aplastado. Aquí puedes limitar movimiento si lo deseas.
+        // EstÃ¡s en modo aplastado. AquÃ­ puedes limitar movimiento si lo deseas.
         //yield return new WaitForSeconds(3f); // Ejemplo: se desaplasta en 3 segundos
         yield return null;
 
@@ -340,6 +320,7 @@ public class PlayerMovement : MonoBehaviourPun, IPunObservable, IInRoomCallbacks
 
     private void Respawn()
     {
+        Debug.Log("RESPAWNING");
         var currentFlag = RespawnManager.instance.GetCurrentRespawnFlag();
         transform.position = new Vector3(
             currentFlag.respawnPosition.position.x - Random.Range(-currentFlag.respawnDistances, currentFlag.respawnDistances),
@@ -351,7 +332,7 @@ public class PlayerMovement : MonoBehaviourPun, IPunObservable, IInRoomCallbacks
     public void Jump()
     {
         animator.Play("StartJump");
-        photonView.RPC("SincronizarSalto", RpcTarget.Others, true);  // Enviamos la animación también
+        photonView.RPC("SincronizarSalto", RpcTarget.Others, true);  // Enviamos la animaciÃ³n tambiÃ©n
         _rb.velocity = new Vector2(_rb.velocity.x, 0f);
         _rb.AddForce(Vector2.up * jumpForce, ForceMode2D.Impulse);
     }
@@ -359,7 +340,7 @@ public class PlayerMovement : MonoBehaviourPun, IPunObservable, IInRoomCallbacks
     [PunRPC]
     void SincronizarSalto(bool saltando)
     {
-        // Sincronizar la animación de salto
+        // Sincronizar la animaciÃ³n de salto
         animator.Play("StartJump");
     }
 
@@ -444,7 +425,7 @@ public class PlayerMovement : MonoBehaviourPun, IPunObservable, IInRoomCallbacks
 
     public void OnPlayerPropertiesUpdate(Player targetPlayer, ExitGames.Client.Photon.Hashtable changedProps)
     {
-        // Solo reaccionamos si este player es el dueño de este GameObject
+        // Solo reaccionamos si este player es el dueÃ±o de este GameObject
         //if (targetPlayer == photonView.Owner && changedProps.ContainsKey("color"))
         //{
         //    ApplyColorFromProperties(targetPlayer);

@@ -52,6 +52,7 @@ MonoBehaviour:
   - SyncPlayerSkin
   - SincronizarSalto
   - RPC_ExitSquished
+  - RPC_UpdateAlturaInicioCaida
   DisableAutoOpenWizard: 1
   ShowSettings: 1
   DevRegionSetOnce: 1
