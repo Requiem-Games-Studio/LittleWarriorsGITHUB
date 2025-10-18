@@ -13,7 +13,7 @@ TagManager:
   - Water
   - UI
   - Rendija
-  - 
+  - Shield
   - 
   - 
   - 
@@ -39,6 +39,15 @@ TagManager:
   - 
   - 
   m_SortingLayers:
+  - name: Back
+    uniqueID: 538853249
+    locked: 0
   - name: Default
     uniqueID: 0
+    locked: 0
+  - name: Front
+    uniqueID: 3511249921
+    locked: 0
+  - name: UI
+    uniqueID: 3642008919
     locked: 0
