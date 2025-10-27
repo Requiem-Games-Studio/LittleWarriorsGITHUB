@@ -16,7 +16,7 @@ GameObject:
   - component: {fileID: 6344981394784484234}
   - component: {fileID: 1381779756947394886}
   - component: {fileID: 5848185666226841268}
-  m_Layer: 0
+  m_Layer: 3
   m_Name: Player
   m_TagString: Player
   m_Icon: {fileID: 0}
@@ -180,6 +180,7 @@ MonoBehaviour:
     m_Bits: 64
   normalCollider: {fileID: 7240353274185392226}
   squishedCollider: {fileID: 597895056538839166}
+  isHiding: 0
   alturaMinimaAplastamiento: 2.5
   brazoIzquierda: {fileID: 8925382761390040632}
   brazoDerecha: {fileID: 1475264425544051728}

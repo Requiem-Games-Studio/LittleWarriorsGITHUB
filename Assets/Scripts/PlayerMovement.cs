@@ -39,6 +39,7 @@ public class PlayerMovement : MonoBehaviourPun, IPunObservable, IInRoomCallbacks
     public BoxCollider2D normalCollider;
     public BoxCollider2D squishedCollider;
     private bool isSquished = false;
+    public bool isHiding = false;
     private float alturaInicioCaida;
     private bool estaCayendo;
     public float alturaMinimaAplastamiento = 3f;
@@ -216,6 +217,19 @@ public class PlayerMovement : MonoBehaviourPun, IPunObservable, IInRoomCallbacks
                 photonView.RPC(nameof(RPC_ExitSquished), RpcTarget.All);
             }
         }
+
+        if (collision.gameObject.CompareTag("HidingPlace"))
+        {
+            isHiding = true;
+        }
+    }
+
+    private void OnTriggerExit2D(Collider2D collision)
+    {
+        if (collision.gameObject.CompareTag("HidingPlace"))
+        {
+            isHiding = false;
+        }
     }
 
 
@@ -318,7 +332,7 @@ public class PlayerMovement : MonoBehaviourPun, IPunObservable, IInRoomCallbacks
         isSquished = false;
     }
 
-    private void Respawn()
+    public void Respawn()
     {
         Debug.Log("RESPAWNING");
         var currentFlag = RespawnManager.instance.GetCurrentRespawnFlag();

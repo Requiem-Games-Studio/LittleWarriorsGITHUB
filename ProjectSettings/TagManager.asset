@@ -5,16 +5,17 @@ TagManager:
   serializedVersion: 2
   tags:
   - RendijaExit
+  - HidingPlace
   layers:
   - Default
   - TransparentFX
   - Ignore Raycast
-  - 
+  - Player
   - Water
   - UI
   - Rendija
   - Shield
-  - 
+  - Enemy
   - 
   - 
   - 
