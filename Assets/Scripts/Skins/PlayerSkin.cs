@@ -49,6 +49,11 @@ public class PlayerSkin : MonoBehaviourPunCallbacks
 
     private void ApplySkinLocal(SkinMaker skin)
     {
+        if (skin == null)
+        {
+            return;
+        }
+
         OJODERECHO.sprite = skin.ojoDerecho;
         OJOIZQUIERDO.sprite = skin.ojoIzquierdo;
 

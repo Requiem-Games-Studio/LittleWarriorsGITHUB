@@ -6235,13 +6235,21 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 0}
     m_Modifications:
-    - target: {fileID: 2114136318281526882, guid: 7f0e2621d08274740a895de475611456, type: 3}
-      propertyPath: m_VertexColorAlwaysGammaSpace
-      value: 1
-      objectReference: {fileID: 0}
-    - target: {fileID: 2114136318281526882, guid: 7f0e2621d08274740a895de475611456, type: 3}
-      propertyPath: m_AdditionalShaderChannelsFlag
-      value: 0
+    - target: {fileID: 2153736791503077538, guid: 7f0e2621d08274740a895de475611456, type: 3}
+      propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_Target
+      value: 
+      objectReference: {fileID: 1055559598}
+    - target: {fileID: 5679184451422497413, guid: 7f0e2621d08274740a895de475611456, type: 3}
+      propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_Target
+      value: 
+      objectReference: {fileID: 1055559598}
+    - target: {fileID: 8196248891292802070, guid: 7f0e2621d08274740a895de475611456, type: 3}
+      propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_Target
+      value: 
+      objectReference: {fileID: 1055559598}
+    - target: {fileID: 8196248891292802070, guid: 7f0e2621d08274740a895de475611456, type: 3}
+      propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_MethodName
+      value: EndGame
       objectReference: {fileID: 0}
     - target: {fileID: 8391197025798419621, guid: 7f0e2621d08274740a895de475611456, type: 3}
       propertyPath: m_Pivot.x
@@ -6321,10 +6329,6 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 8391197025798419621, guid: 7f0e2621d08274740a895de475611456, type: 3}
       propertyPath: m_LocalEulerAnglesHint.z
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 8521369890481868953, guid: 7f0e2621d08274740a895de475611456, type: 3}
-      propertyPath: m_IsActive
       value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 9100949439071377583, guid: 7f0e2621d08274740a895de475611456, type: 3}
